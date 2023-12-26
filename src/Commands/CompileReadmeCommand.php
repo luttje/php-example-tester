@@ -66,7 +66,7 @@ class CompileReadmeCommand extends Command
                     break;
                 }
 
-                $directory .= DIRECTORY_SEPARATOR . str_replace($autoloadNamespace, '', $namespace);
+                $directory .= DIRECTORY_SEPARATOR . trim(str_replace($autoloadNamespace, '', $namespace), "\\");
 
                 if (realpath($directory)) {
                     break;
