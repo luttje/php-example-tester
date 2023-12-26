@@ -66,9 +66,10 @@ class CompileReadmeCommand extends Command
                     break;
                 }
 
-                $directory .= DIRECTORY_SEPARATOR . str_replace($autoloadNamespace, '', $namespace);
+                $directory .= DIRECTORY_SEPARATOR . trim(str_replace($autoloadNamespace, '', $namespace), "\\");
+                $directory = realpath($directory);
 
-                if (realpath($directory)) {
+                if ($directory !== false) {
                     break;
                 }
 
@@ -174,7 +175,7 @@ class CompileReadmeCommand extends Command
                 continue;
             }
 
-            $className = $namespace . str_replace([$directory, '.php'], ['', ''], $file->getPathname());
+            $className = $namespace . ltrim(str_replace([$directory, '.php'], ['', ''], $file->getPathname()), DIRECTORY_SEPARATOR);
 
             if (! class_exists($className)) {
                 echo $className . ' does not exist' . PHP_EOL;
