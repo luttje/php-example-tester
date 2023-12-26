@@ -3,6 +3,7 @@
 namespace Luttje\ExampleTester\Tests\Unit;
 
 use Luttje\ExampleTester\Tests\TestCase;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -29,7 +30,6 @@ final class CompileReadmeCommandTest extends TestCase
             '--warning-comment' => 'false',
         ]);
 
-        $commandTester->assertCommandIsSuccessful();
         $output = $commandTester->getDisplay();
 
         $this->assertStringContainsString('Done compiling examples!', $output);

@@ -16,6 +16,9 @@
     backupStaticProperties="false"
 >
     <testsuites>
+        <testsuite name="Fixtures">
+            <directory>tests/Fixtures</directory>
+        </testsuite>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
         </testsuite>
