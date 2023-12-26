@@ -9,7 +9,7 @@ class ReadmeExampleDescription
 {
     public function __construct(
         public string $description,
-        public ?string $footnotes = null,
+        public ?string $footer = null,
     ) {
     }
 }

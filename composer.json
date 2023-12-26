@@ -33,6 +33,9 @@
             "Luttje\\ExampleTester\\Tests\\": "tests/"
         }
     },
+    "bin": [
+        "bin/example-tester"
+    ],
     "scripts": {
         "test": "vendor/bin/phpunit tests",
         "test-ci": "@test-coverage",

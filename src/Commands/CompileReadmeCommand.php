@@ -12,9 +12,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'example-tester:compile',
-    description: 'Compile the README.md file for the package based on attributes in the tests.',
-    aliases: ['example-tester:compile-readme'],
+    name: 'compile',
+    description: 'Compile the README.md file for the package based on attributes in the tests. Run this command from the root of your project.',
+    aliases: ['compile-readme'],
 )]
 class CompileReadmeCommand extends Command
 {
@@ -22,33 +22,64 @@ class CompileReadmeCommand extends Command
     {
         $this
             ->addArgument(
-                'class',
+                'namespace',
                 mode: InputArgument::REQUIRED,
-                description: 'A fully qualified class name which contains the examples.'
+                description: 'The namespace to search for tests with attributes. Uses composer autoload to find the files. Must be autoloaded through PSR-4.',
             )
             ->addOption(
                 'output',
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The path to the README.md file to write to. Defaults to the README.md file in the root of the package.'
+                description: 'The path to the README.md file to write to. Defaults to the README.md file in the root of the package.',
             )
             ->addOption(
                 'input',
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The path to the README.md file to read from. Defaults to the same file as the output.'
+                description: 'The path to the README.md file to read from. Defaults to the same file as the output.',
             )
             ->addOption(
                 'warning-comment',
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'Path to a file containing the warning comment to prepend to the examples section. Defaults to the warning comment in the ReadmeExampleCompiler class. If set to false, no warning comment will be prepended.'
+                description: 'Path to a file containing the warning comment to prepend to the examples section. Defaults to the warning comment in the ReadmeExampleCompiler class. If set to false, no warning comment will be prepended.',
             )
         ;
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $class = $input->getArgument('class');
-        $outputFile = $input->getOption('output') ?? __DIR__.'/../../README.md';
+        $workingDirectory = getcwd();
+        $namespace = trim($input->getArgument('namespace'), "\\") . '\\';
+        $outputFile = $input->getOption('output') ?? $workingDirectory.'/README.md';
         $inputFile = $input->getOption('input') ?? $outputFile;
+
+        // Check if the namespace is autoloaded through PSR-4.
+        $autoloadNamespaces = require $workingDirectory.'/vendor/composer/autoload_psr4.php';
+        $directory = null;
+
+        foreach ($autoloadNamespaces as $autoloadNamespace => $autoloadDirectory) {
+            if (str_starts_with($namespace, $autoloadNamespace)) {
+                $directory = $autoloadDirectory[0];
+
+                // If it exactly matches, we can stop searching. If this is only a parent namespace we will append the
+                // rest of the namespace to the directory and check if that exists.
+                if ($namespace === $autoloadNamespace) {
+                    break;
+                }
+
+                $directory .= DIRECTORY_SEPARATOR . str_replace($autoloadNamespace, '', $namespace);
+
+                if (realpath($directory)) {
+                    break;
+                }
+
+                $directory = null;
+            }
+        }
+
+        if ($directory === null) {
+            $output->writeLn("<error>Namespace {$namespace} nor any of it's parents are not autoloaded through PSR-4.</error>");
+
+            return Command::FAILURE;
+        }
 
         if (! is_file($inputFile)) {
             $output->writeLn("<error>Input file {$inputFile} does not exist.</error>");
@@ -98,7 +129,7 @@ class CompileReadmeCommand extends Command
 
         $readme = preg_replace(
             '/<!-- #EXAMPLES_START -->(.*)<!-- #EXAMPLES_END -->/s',
-            '<!-- #EXAMPLES_START -->'.$warning.$this->getExamplesMarkdown($class)."\n\n".'<!-- #EXAMPLES_END -->',
+            '<!-- #EXAMPLES_START -->'.$warning.$this->getExamplesMarkdown($directory, $namespace)."\n\n".'<!-- #EXAMPLES_END -->',
             $readme
         );
 
@@ -123,10 +154,46 @@ class CompileReadmeCommand extends Command
         TEXT);
     }
 
-    public function getExamplesMarkdown(string $class): string
+    /**
+     * Goes through all php files in the given directory and returns the markdown for all examples.
+     */
+    public function getExamplesMarkdown(string $directory, string $namespace): string
     {
-        $discoverer = new ReadmeExampleCompiler($class);
+        $allMarkdown = '';
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory));
 
-        return $discoverer->toMarkdown();
+        foreach ($files as $file) {
+            if (! $file->isFile()) {
+                continue;
+            }
+
+            if ($file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $className = $namespace . str_replace([$directory, '.php'], ['', ''], $file->getPathname());
+
+            if (! class_exists($className)) {
+                echo $className . ' does not exist' . PHP_EOL;
+                continue;
+            }
+
+            $reflectionClass = new \ReflectionClass($className);
+
+            if ($reflectionClass->isAbstract()) {
+                continue;
+            }
+
+            $compiler = new ReadmeExampleCompiler($className);
+            $markdown = $compiler->toMarkdown();
+
+            if ($markdown === '') {
+                continue;
+            }
+
+            $allMarkdown .= $markdown;
+        }
+
+        return $allMarkdown;
     }
 }

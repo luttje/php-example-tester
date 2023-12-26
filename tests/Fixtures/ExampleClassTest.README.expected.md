@@ -20,7 +20,10 @@ $b = 25;
 $c = $a + $b;
 
 echo $c;
+// This is the end of the example method.
 ```
+
+*🤓 Yay calculations!*
 
 <!-- #EXAMPLES_END -->
 

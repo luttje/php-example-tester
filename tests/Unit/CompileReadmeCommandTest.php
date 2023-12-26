@@ -18,12 +18,12 @@ final class CompileReadmeCommandTest extends TestCase
             mkdir(dirname($outputFile), 0777, true);
         }
 
-        $inputFile = __DIR__.'/../Fixtures/ExampleClass.README.md';
+        $inputFile = __DIR__.'/../Fixtures/ExampleClassTest.README.md';
 
-        $command = $this->application->find('example-tester:compile');
+        $command = $this->application->find('compile');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'class' => \Luttje\ExampleTester\Tests\Fixtures\ExampleClass::class,
+            'namespace' => 'Luttje\\ExampleTester\\Tests\\Fixtures',
             '--input' => $inputFile,
             '--output' => $outputFile,
             '--warning-comment' => 'false',
@@ -34,7 +34,7 @@ final class CompileReadmeCommandTest extends TestCase
 
         $this->assertStringContainsString('Done compiling examples!', $output);
 
-        $this->assertFileEquals(__DIR__.'/../Fixtures/ExampleClass.README.expected.md', $outputFile);
+        $this->assertFileEquals(__DIR__.'/../Fixtures/ExampleClassTest.README.expected.md', $outputFile);
 
         unlink($outputFile);
     }

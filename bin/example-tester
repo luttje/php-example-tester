@@ -1,0 +1,48 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ *
+ * Composer autoload.
+ *
+ * Autoload relative to the working directory so we can also access
+ * the classes of a project that uses this package as a dependency.
+ *
+ */
+require getcwd().'/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+
+/**
+ *
+ * Create the symfony console application.
+ *
+ */
+$application = new Application();
+
+/**
+ *
+ * Add all commands to the application.
+ *
+ */
+$commands = require __DIR__.'/../commands.php';
+
+foreach ($commands as $command) {
+    $application->add(new $command);
+}
+
+/**
+ * Run the application.
+ *
+ * To run commands in this application, use the following commands:
+ *
+ * - In this project:
+ *   `php bin/example-tester ...`
+ *
+ * - In a project that uses this package as a dependency:
+ *   `vendor/bin/example-tester ...`
+ *
+ */
+$application->run();
+
+return $application;

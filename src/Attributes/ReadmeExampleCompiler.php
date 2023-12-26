@@ -91,22 +91,22 @@ class ReadmeExampleCompiler
         $markdown .= "\n\n### {$name}";
 
         foreach ($examples as $example) {
-            $footnotes = '';
+            $footer = '';
 
             foreach ($example['descriptions'] as $description) {
                 $descriptionText = Indentation::unindent($description->description);
                 $markdown .= "\n\n{$descriptionText}";
 
-                if ($description->footnotes) {
-                    $footnotesText = Indentation::unindent($description->footnotes);
-                    $footnotes .= "{$footnotesText}";
+                if ($description->footer) {
+                    $footnotesText = Indentation::unindent($description->footer);
+                    $footer .= "{$footnotesText}";
                 }
             }
 
             $markdown .= "\n\n```php\n{$example['code']}\n```";
 
-            if ($footnotes) {
-                $markdown .= "\n\n{$footnotes}";
+            if ($footer) {
+                $markdown .= "\n\n{$footer}";
             }
         }
 
