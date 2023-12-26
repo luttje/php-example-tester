@@ -73,7 +73,6 @@ class CompileReadmeCommand extends Command
                     break;
                 }
 
-                $output->writeLn("Debug: $directory does not exist");
                 $directory = null;
             }
         }

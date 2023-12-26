@@ -3,7 +3,6 @@
 namespace Luttje\ExampleTester\Tests\Unit;
 
 use Luttje\ExampleTester\Tests\TestCase;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
