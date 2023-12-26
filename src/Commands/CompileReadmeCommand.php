@@ -52,7 +52,8 @@ class CompileReadmeCommand extends Command
         $inputFile = $input->getOption('input') ?? $outputFile;
 
         // Check if the namespace is autoloaded through PSR-4.
-        $autoloadNamespaces = require $workingDirectory.'/vendor/composer/autoload_psr4.php';
+        $autoloadPath = $workingDirectory.'/vendor/composer/autoload_psr4.php';
+        $autoloadNamespaces = require $autoloadPath;
         $directory = null;
 
         foreach ($autoloadNamespaces as $autoloadNamespace => $autoloadDirectory) {
@@ -71,12 +72,14 @@ class CompileReadmeCommand extends Command
                     break;
                 }
 
+                $output->writeLn("Debug: $directory does not exist");
                 $directory = null;
             }
         }
 
         if ($directory === null) {
-            $output->writeLn("<error>Namespace {$namespace} nor any of it's parents are not autoloaded through PSR-4.</error>");
+            $exists = is_file($autoloadPath) ? 'exists' : 'does not exist';
+            $output->writeLn("<error>Namespace {$namespace} nor any of it's parents are not autoloaded through PSR-4. Used path: $autoloadPath ($exists).</error>");
 
             return Command::FAILURE;
         }
