@@ -7,8 +7,11 @@ use Luttje\ExampleTester\Extractor\CodeExtractorInterface;
 
 class ReadmeParser implements ReadmeParserInterface
 {
-    public const START_MARKER = '<!-- #EXAMPLE_COPY_START = ';
-    public const END_MARKER = '<!-- #EXAMPLE_COPY_END -->';
+    public const COPY_MARKER_START = '<!-- #EXAMPLE_COPY_START = ';
+    public const COPY_MARKER_END = '<!-- #EXAMPLE_COPY_END -->';
+
+    public const IGNORE_MARKER_START = '<!-- #EXAMPLE_COPY_IGNORE_START -->';
+    public const IGNORE_MARKER_END = '<!-- #EXAMPLE_COPY_IGNORE_END -->';
 
     public function __construct(
         protected ExampleFormatterInterface $exampleFormatter,
@@ -18,12 +21,22 @@ class ReadmeParser implements ReadmeParserInterface
 
     protected function isStartMarker(string $line): bool
     {
-        return strpos($line, self::START_MARKER) !== false;
+        return strpos($line, self::COPY_MARKER_START) !== false;
     }
 
     protected function isEndMarker(string $line): bool
     {
-        return strpos($line, self::END_MARKER) !== false;
+        return strpos($line, self::COPY_MARKER_END) !== false;
+    }
+
+    protected function isIgnoreStartMarker(string $line): bool
+    {
+        return strpos($line, self::IGNORE_MARKER_START) !== false;
+    }
+
+    protected function isIgnoreEndMarker(string $line): bool
+    {
+        return strpos($line, self::IGNORE_MARKER_END) !== false;
     }
 
     protected function makeChunk(string $chunk): ReadmeChunk
@@ -63,20 +76,30 @@ class ReadmeParser implements ReadmeParserInterface
 
         $chunk = '';
 
+        $isIgnoringMarkers = false;
+
         foreach ($lines as $line) {
-            if ($this->isStartMarker($line)) {
-                $chunks[] = $this->makeChunk($chunk);
+            if ($this->isIgnoreStartMarker($line)) {
+                $isIgnoringMarkers = true;
+            } elseif ($this->isIgnoreEndMarker($line)) {
+                $isIgnoringMarkers = false;
+            } elseif (!$isIgnoringMarkers) {
+                if ($this->isStartMarker($line)) {
+                    $chunks[] = $this->makeChunk($chunk);
 
-                $chunk = $line . "\n";
-            } elseif ($this->isEndMarker($line)) {
-                $chunk .= $line;
+                    $chunk = '';
+                } elseif ($this->isEndMarker($line)) {
+                    $chunk .= $line;
 
-                $chunks[] = $this->makeExampleChunk($chunk);
+                    $chunks[] = $this->makeExampleChunk($chunk);
 
-                $chunk = '';
-            } else {
-                $chunk .= $line . "\n";
+                    $chunk = '';
+
+                    continue;
+                }
             }
+
+            $chunk .= $line . "\n";
         }
 
         // Trim off the last newline

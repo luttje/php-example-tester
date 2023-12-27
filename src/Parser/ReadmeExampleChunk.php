@@ -28,8 +28,8 @@ class ReadmeExampleChunk extends ReadmeChunk
 
     protected function getMarkerConfig(string $content): MarkerConfig
     {
-        $startMarker = ReadmeParser::START_MARKER;
-        $endMarker = ReadmeParser::END_MARKER;
+        $startMarker = ReadmeParser::COPY_MARKER_START;
+        $endMarker = ReadmeParser::COPY_MARKER_END;
 
         $startMarkerPos = strpos($content, $startMarker);
         $endMarkerPos = strpos($content, $endMarker);

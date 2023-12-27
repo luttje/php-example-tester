@@ -26,6 +26,7 @@ composer require luttje/php-example-tester
 
 Add the start and end comments to your README where you want each individual example to appear:
 
+<!-- #EXAMPLE_COPY_IGNORE_START -->
 > ````html
 > ### `exampleMethod`
 >
@@ -41,6 +42,7 @@ Add the start and end comments to your README where you want each individual exa
 >
 > *🤓 Yay calculations!*
 > ````
+<!-- #EXAMPLE_COPY_IGNORE_END -->
 
 *For a full example have a look at [👀 the example README with placeholders](tests/Fixtures/ExampleClassTest.README.md).*
 
@@ -100,18 +102,18 @@ After running the command, the examples will be compiled into your README. This 
 > **Here's the example code:**
 >
 > <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
->
+> 
 > ```php
 > // This is an example method.
 > $a = 1;
 > $b = 25;
 > 
 > $c = $a + $b;
->
+> 
 > echo $c;
 > // This is the end of the example method.
 > ```
->
+> 
 > <!-- #EXAMPLE_COPY_END -->
 >
 > *🤓 Yay calculations!*
