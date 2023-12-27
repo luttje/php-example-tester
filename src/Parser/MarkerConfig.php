@@ -2,6 +2,8 @@
 
 namespace Luttje\ExampleTester\Parser;
 
+use Luttje\ExampleTester\Helpers\TypeGuard;
+
 class MarkerConfig
 {
     protected string $symbol;
@@ -15,9 +17,7 @@ class MarkerConfig
         $markerConfig = new static();
 
         foreach($array as $key => $value) {
-            if (!property_exists(static::class, $key)) {
-                throw new \Exception(sprintf('Property "%s" does not exist on %s', $key, static::class));
-            }
+            TypeGuard::throwIfTypeIsMissingOrWrong(static::class, $key, $value);
 
             $markerConfig->$key = $value;
         }
