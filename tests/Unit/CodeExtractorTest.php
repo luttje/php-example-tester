@@ -174,7 +174,7 @@ final class CodeExtractorTest extends TestCase
         CODE, $code);
     }
 
-    public function testClassWithDocComment()
+    public function testClassDefinitionWithDocComment()
     {
         $codeExtractor = new CodeExtractor();
         $code = $codeExtractor->extractClassDefinition(AlternativeStylingClass::class);
@@ -197,6 +197,27 @@ final class CodeExtractorTest extends TestCase
                 echo $c;
                 // end
             }
+        CODE, $code);
+    }
+
+    public function testClassBodyContainingComment()
+    {
+        $codeExtractor = new CodeExtractor();
+        $code = $codeExtractor->extractClassBody(AlternativeStylingClass::class);
+
+        $this->assertStringStartsWith(<<<'CODE'
+        /**
+         * A method with braces on the same line
+         */
+        public static function methodWithBracesOnSameLine(): void {
+            // start
+            $a = 1;
+            $b = 25;
+
+            $c = $a + $b;
+            echo $c;
+            // end
+        }
         CODE, $code);
     }
 }
