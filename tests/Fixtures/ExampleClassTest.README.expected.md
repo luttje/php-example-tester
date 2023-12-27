@@ -136,7 +136,7 @@ This example will be ignored.
 
 <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
 
-Should be removed.
+Should not be removed.
 
 <!-- #EXAMPLE_COPY_END -->
 

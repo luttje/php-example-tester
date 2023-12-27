@@ -217,23 +217,27 @@ The `short` property defaults to `true` and ensures only the body of the method 
 >
 > <!-- #EXAMPLE_COPY_END -->
 
-## Ignoring examples
+### Ignoring examples
 
-Especially for the readme in the root of this package, we want to selectively ignore examples. This can be done by adding `<!-- #EXAMPLE_COPY_IGNORE_START -->` and `<!-- #EXAMPLE_COPY_IGNORE_END -->` comments around the examples you want to ignore.
+Especially for the readme in the root of this package, we want to selectively ignore examples. 
+This can be done by wrapping `<!-- #EXAMPLE_COPY_IGNORE_START -->` and `<!-- #EXAMPLE_COPY_IGNORE_END -->` 
+comments around the sections of the readme where you want to not copy examples.
 
+```html
 <!-- #EXAMPLE_COPY_IGNORE_START -->
 
-### Ignored example
+#### Ignored example
 
 This example will be ignored.
 
 <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
 
-Should be removed.
+Should not be removed.
 
 <!-- #EXAMPLE_COPY_END -->
 
 <!-- #EXAMPLE_COPY_IGNORE_END -->
+```
 
 ### Command-line interface
 
