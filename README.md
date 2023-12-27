@@ -26,19 +26,21 @@ composer require luttje/php-example-tester
 
 Add the start and end comments to your README where you want each individual example to appear:
 
-```html
-### `exampleMethod`
-
-Document the example method here, as you normally would.
-
-**Here's the example:**
-
-<!-- #EXAMPLE_COPY_START = { "method": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
-
-This part will be replaced with the example code in a markdown code block for php.
-
-<!-- #EXAMPLE_COPY_END -->
-```
+> ````html
+> ### `exampleMethod`
+>
+> Document the example method here, as you normally would.
+>
+> **Here's the example code:**
+>
+> <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
+>
+> This will be replaced with the example code.
+>
+> <!-- #EXAMPLE_COPY_END -->
+>
+> *🤓 Yay calculations!*
+> ````
 
 *For a full example have a look at [👀 the example README with placeholders](tests/Fixtures/ExampleClassTest.README.md).*
 
@@ -47,9 +49,36 @@ This part will be replaced with the example code in a markdown code block for ph
 Write your tests in a separate static method in your test class. This package
 can then extract the body of the method and use it as the example code.
 
-<!-- #EXAMPLE_COPY_START = { "class": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest" } -->
+<!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
 
-TODO
+```php
+final class ExampleClassTest extends TestCase
+{
+    public static function exampleMethod(): void
+    {
+        // This is an example method.
+        $a = 1;
+        $b = 25;
+
+        $c = $a + $b;
+
+        echo $c;
+        // This is the end of the example method.
+    }
+
+    /**
+     * @test
+     */
+    public function testExampleMethod(): void
+    {
+        ob_start();
+        self::exampleMethod();
+        $output = ob_get_clean();
+
+        $this->assertSame('26', $output);
+    }
+}
+```
 
 <!-- #EXAMPLE_COPY_END -->
 
@@ -66,10 +95,11 @@ After running the command, the examples will be compiled into your README. This 
 
 > ### `exampleMethod`
 >
-> This is an example description.
-> It can be multiple lines long and **formatted**.
+> Document the example method here, as you normally would.
 >
-> <!-- #EXAMPLE_COPY_START = { "method": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
+> **Here's the example code:**
+>
+> <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
 >
 > ```php
 > // This is an example method.
@@ -77,7 +107,7 @@ After running the command, the examples will be compiled into your README. This 
 > $b = 25;
 > 
 > $c = $a + $b;
-> 
+>
 > echo $c;
 > // This is the end of the example method.
 > ```
@@ -119,7 +149,7 @@ can find the vendor directory containing the composer autoload file.
 The path to the README file to write the compiled examples to. Defaults to `README.md` in the root of your project.
 
 ```bash
-vendor/bin/example-tester compile --output DOCS.md \\Your\\Autoloaded\\Namespace\\
+vendor/bin/example-tester compile --output DOCS.md
 ```
 
 ### `--input`

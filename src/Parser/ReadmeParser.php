@@ -3,7 +3,7 @@
 namespace Luttje\ExampleTester\Parser;
 
 use Luttje\ExampleTester\Compiler\ExampleFormatterInterface;
-use Luttje\ExampleTester\Extractor\TestExtractorInterface;
+use Luttje\ExampleTester\Extractor\CodeExtractorInterface;
 
 class ReadmeParser implements ReadmeParserInterface
 {
@@ -12,7 +12,7 @@ class ReadmeParser implements ReadmeParserInterface
 
     public function __construct(
         protected ExampleFormatterInterface $exampleFormatter,
-        protected TestExtractorInterface $testExtractor
+        protected CodeExtractorInterface $testExtractor
     )
     { }
 

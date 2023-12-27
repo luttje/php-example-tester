@@ -39,7 +39,8 @@
     "scripts": {
         "test": "vendor/bin/phpunit tests",
         "test-ci": "@test-coverage",
-        "test-coverage": "@test --coverage-clover build/logs/clover.xml"
+        "test-coverage": "@test --coverage-clover build/logs/clover.xml",
+        "compile-readme": "php bin/example-tester compile"
     },
     "config": {
         "sort-packages": true

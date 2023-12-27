@@ -2,7 +2,7 @@
 
 namespace Luttje\ExampleTester\Compiler;
 
-use Luttje\ExampleTester\Extractor\TestExtractor;
+use Luttje\ExampleTester\Extractor\CodeExtractor;
 use Luttje\ExampleTester\Parser\ReadmeParser;
 use Luttje\ExampleTester\Parser\ReadmeParserInterface;
 
@@ -13,7 +13,7 @@ class ReadmeCompiler implements ReadmeCompilerInterface
     ) {
         $this->readmeParser = $readmeParser ?? new ReadmeParser(
             new ExampleFormatter(),
-            new TestExtractor()
+            new CodeExtractor()
         );
     }
 

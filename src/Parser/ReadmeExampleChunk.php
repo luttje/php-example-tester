@@ -3,14 +3,14 @@
 namespace Luttje\ExampleTester\Parser;
 
 use Luttje\ExampleTester\Compiler\ExampleFormatterInterface;
-use Luttje\ExampleTester\Extractor\TestExtractorInterface;
+use Luttje\ExampleTester\Extractor\CodeExtractorInterface;
 
 class ReadmeExampleChunk extends ReadmeChunk
 {
     public function __construct(
         protected string $content,
         protected ExampleFormatterInterface $exampleFormatter,
-        protected TestExtractorInterface $testExtractor
+        protected CodeExtractorInterface $testExtractor
     )
     { }
 
@@ -39,29 +39,38 @@ class ReadmeExampleChunk extends ReadmeChunk
         $markerContent = substr($content, $startMarkerPos + $markerLength, $endMarkerPos - $startMarkerPos - $markerLength);
         $markerContent = substr($markerContent, 0, strpos($markerContent, '-->'));
 
-        // If it's a JSON string, decode it, otherwise use it as a method name
+        // If it's a JSON string, decode it, otherwise use it as a symbol name
         if (strpos($markerContent, '{') === 0) {
             $markerConfig = json_decode($markerContent, true);
         } else {
             $markerConfig = [];
-            $markerConfig['method'] = $markerContent;
+            $markerConfig['symbol'] = $markerContent;
         }
 
         $startMarker = substr($content, $startMarkerPos, $markerLength + strlen($markerContent) + 3);
         $endMarker = substr($content, $endMarkerPos, strlen($endMarker));
 
-        $markerConfig = new MarkerConfig(
-            $markerConfig['method'],
-            $startMarker,
-            $endMarker
-        );
+        $markerConfig['startMarker'] = $startMarker;
+        $markerConfig['endMarker'] = $endMarker;
+
+        $markerConfig = MarkerConfig::fromArray($markerConfig);
 
         return $markerConfig;
     }
 
     protected function extractExample(MarkerConfig $markerConfig): string
     {
-        $example = $this->testExtractor->extractMethodBody($markerConfig->getMethod());
+        $symbol = $markerConfig->getSymbol();
+
+        if (class_exists($symbol)) {
+            $example = $markerConfig->isShort()
+                ? $this->testExtractor->extractClassBody($symbol)
+                : $this->testExtractor->extractClassDefinition($symbol);
+        } else {
+            $example = $markerConfig->isShort()
+                ? $this->testExtractor->extractMethodBody($symbol)
+                : $this->testExtractor->extractMethodDefinition($symbol);
+        }
 
         return $example;
     }
