@@ -15,16 +15,26 @@ class CodeExtractor implements CodeExtractorInterface
         $reflectionMethod = $reflectionClass->getMethod($methodName);
 
         $fileName = $reflectionMethod->getFileName();
-        $startLine = $reflectionMethod->getStartLine();
+        $startLine = $reflectionMethod->getStartLine() - 1;
         $endLine = $reflectionMethod->getEndLine() - 1;
 
         $code = '';
+        $hasFoundBody = false;
 
         foreach (range($startLine, $endLine) as $lineNumber) {
-            $code .= file($fileName)[$lineNumber];
+            $line = file($fileName)[$lineNumber];
+
+            if ($hasFoundBody) {
+                $code .= $line;
+            } else {
+                // This fails if a parameter has a default value with a curly brace in it
+                if (strpos($line, '{') !== false) {
+                    $hasFoundBody = true;
+                }
+            }
         }
 
-        $code = ltrim(rtrim(Indentation::unindent($code)));
+        $code = rtrim(Indentation::unindent($code));
 
         // Remove { and } and any newlines before/after them
         $code = preg_replace('/^{[\r\n]+/', '', $code);
