@@ -5,12 +5,12 @@ examples (from the tests) into this file.
 
 ## Examples
 
-<!-- #EXAMPLES_START -->
-
 ### `exampleMethod`
 
 This is an example description.
 It can be multiple lines long and **formatted**.
+
+<!-- #EXAMPLE_COPY_START = { "method": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
 
 ```php
 // This is an example method.
@@ -23,9 +23,9 @@ echo $c;
 // This is the end of the example method.
 ```
 
-*🤓 Yay calculations!*
+<!-- #EXAMPLE_COPY_END -->
 
-<!-- #EXAMPLES_END -->
+*🤓 Yay calculations!*
 
 ## License
 

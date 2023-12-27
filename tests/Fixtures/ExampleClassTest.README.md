@@ -5,11 +5,18 @@ examples (from the tests) into this file.
 
 ## Examples
 
-<!-- #EXAMPLES_START -->
+### `exampleMethod`
+
+This is an example description.
+It can be multiple lines long and **formatted**.
+
+<!-- #EXAMPLE_COPY_START = { "method": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
 
 Should be removed.
 
-<!-- #EXAMPLES_END -->
+<!-- #EXAMPLE_COPY_END -->
+
+*🤓 Yay calculations!*
 
 ## License
 

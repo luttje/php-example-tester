@@ -1,6 +1,6 @@
 {
     "name": "luttje/php-example-tester",
-    "description": "Use PHP Attributes on code in your tests to automatically compile them into your README",
+    "description": "Use comments in markdown to automatically compile tested examples into your README",
     "keywords": [
         "luttje",
         "php",

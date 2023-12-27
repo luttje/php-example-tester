@@ -23,10 +23,8 @@ final class CompileReadmeCommandTest extends TestCase
         $command = $this->application->find('compile');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'namespace' => 'Luttje\\ExampleTester\\Tests\\Fixtures',
             '--input' => $inputFile,
             '--output' => $outputFile,
-            '--warning-comment' => 'false',
         ]);
 
         $output = $commandTester->getDisplay();
