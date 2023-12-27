@@ -10,7 +10,7 @@ examples (from the tests) into this file.
 This is an example description.
 It can be multiple lines long and **formatted**.
 
-<!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
+<!-- #EXAMPLE_COPY_START = \Luttje\ExampleTester\Tests\Fixtures\ExampleClassTest::exampleMethod -->
 
 ```php
 // This is an example method.
@@ -31,7 +31,7 @@ echo $c;
 
 An entire class body can be copied into the README.md file too!
 
-<!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest" } -->
+<!-- #EXAMPLE_COPY_START = \Luttje\ExampleTester\Tests\Fixtures\ExampleClassTest -->
 
 ```php
 public static function exampleMethod(): void

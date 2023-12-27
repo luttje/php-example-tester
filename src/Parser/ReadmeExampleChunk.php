@@ -44,7 +44,7 @@ class ReadmeExampleChunk extends ReadmeChunk
             $markerConfig = json_decode($markerContent, true);
         } else {
             $markerConfig = [];
-            $markerConfig['symbol'] = $markerContent;
+            $markerConfig['symbol'] = trim($markerContent);
         }
 
         $startMarker = substr($content, $startMarkerPos, $markerLength + strlen($markerContent) + 3);

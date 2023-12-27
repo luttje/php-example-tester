@@ -2,13 +2,9 @@
 
 namespace Luttje\ExampleTester\Commands;
 
-use ColinODell\Indentation\Indentation;
-use Luttje\ExampleTester\Attributes\ReadmeExampleCompiler;
 use Luttje\ExampleTester\Compiler\ReadmeCompiler;
-use Luttje\ExampleTester\Parser\ReadmeParser;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -67,7 +63,7 @@ class CompileReadmeCommand extends Command
             $output->writeLn("Compiling examples from {$inputFile} to {$outputFile}...");
         }
 
-        if (!$this->compile($inputFile, $outputFile, $output)) {
+        if (!$this->compile($inputFile, $outputFile)) {
             return Command::FAILURE;
         }
 
@@ -76,7 +72,7 @@ class CompileReadmeCommand extends Command
         return Command::SUCCESS;
     }
 
-    protected function compile(string $inputFile, string $outputFile, OutputInterface $output): bool
+    protected function compile(string $inputFile, string $outputFile): bool
     {
         $compiler = new ReadmeCompiler();
         $compiler->compile($inputFile, $outputFile);

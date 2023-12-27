@@ -34,7 +34,7 @@ Add the start and end comments to your README where you want each individual exa
 >
 > **Here's the example code:**
 >
-> <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
+> <!-- #EXAMPLE_COPY_START = \Luttje\ExampleTester\Tests\Fixtures\ExampleClassTest::exampleMethod -->
 >
 > This will be replaced with the example code.
 >
@@ -44,9 +44,12 @@ Add the start and end comments to your README where you want each individual exa
 > ````
 <!-- #EXAMPLE_COPY_IGNORE_END -->
 
-*For a full example have a look at [👀 the example README with placeholders](tests/Fixtures/ExampleClassTest.README.md).*
+*For a full example have a look at [👀 the example README with placeholders](tests/Fixtures/ExampleClassTest.README.md?plain=1).*
 
-### 2. Write tests for that specific example code
+You must provide a fully qualified path to the method you want to copy. You can
+also provide a fully qualified path to a class to copy the entire class.
+
+### 2. Write tests for that example code
 
 Write your tests in a separate static method in your test class. This package
 can then extract the body of the method and use it as the example code.
@@ -118,7 +121,7 @@ After running the command, the examples will be compiled into your README. This 
 >
 > *🤓 Yay calculations!*
 
-*For a full example have a look at [🏗 the compiled example README](tests/Fixtures/ExampleClassTest.README.expected.md).*
+*For a full example have a look at [🏗 the compiled example README](tests/Fixtures/ExampleClassTest.README.expected.md?plain=1).*
 
 > [!Note]
 > You can make your workflow even smoother by adding the `example-tester compile`
@@ -135,7 +138,104 @@ After running the command, the examples will be compiled into your README. This 
 }
 ```
 
-## Options
+## Advanced usage
+
+You've seen the simple syntax to mark the start of an example, but you can also provide some extra options to the `#EXAMPLE_COPY_START` comment in the form of a JSON object:
+
+```html
+<!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod" } -->
+```
+
+Is equivalent to this simpler syntax:
+
+```html
+<!-- #EXAMPLE_COPY_START = \Luttje\ExampleTester\Tests\Fixtures\ExampleClassTest::exampleMethod -->
+```
+
+However providing a JSON object unlocks the ability to configure additional properties, like the `short` property.
+
+### The `short` property
+
+The `short` property defaults to `true` and ensures only the body of the method or class is copied into the README.md file.
+
+#### Setting `short` to `false` for a method
+>
+> Setting the `short` property to `false` will also copy the entire method signature into the README.md file for this result:
+>
+> <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod", "short": false } -->
+>
+> ```php
+> public static function exampleMethod(): void
+> {
+>     // This is an example method.
+>     $a = 1;
+>     $b = 25;
+>
+>     $c = $a + $b;
+>
+>     echo $c;
+>     // This is the end of the example method.
+> }
+> ```
+>
+> <!-- #EXAMPLE_COPY_END -->
+
+#### Setting `short` to `false` for a class
+>
+> For classes it may make more sense to set `short` to `false` to copy the entire class into the README.md file for this result:
+>
+> <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
+>
+> ```php
+> final class ExampleClassTest extends TestCase
+> {
+>     public static function exampleMethod(): void
+>     {
+>         // This is an example method.
+>         $a = 1;
+>         $b = 25;
+>
+>         $c = $a + $b;
+>
+>         echo $c;
+>         // This is the end of the example method.
+>     }
+>
+>     /**
+>      * @test
+>      */
+>     public function testExampleMethod(): void
+>     {
+>         ob_start();
+>         self::exampleMethod();
+>         $output = ob_get_clean();
+>
+>         $this->assertSame('26', $output);
+>     }
+> }
+> ```
+>
+> <!-- #EXAMPLE_COPY_END -->
+
+## Ignoring examples
+
+Especially for the readme in the root of this package, we want to selectively ignore examples. This can be done by adding `<!-- #EXAMPLE_COPY_IGNORE_START -->` and `<!-- #EXAMPLE_COPY_IGNORE_END -->` comments around the examples you want to ignore.
+
+<!-- #EXAMPLE_COPY_IGNORE_START -->
+
+### Ignored example
+
+This example will be ignored.
+
+<!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
+
+Should be removed.
+
+<!-- #EXAMPLE_COPY_END -->
+
+<!-- #EXAMPLE_COPY_IGNORE_END -->
+
+### Command-line interface
 
 The command has the following signature:
 
