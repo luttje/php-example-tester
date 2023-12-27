@@ -70,21 +70,21 @@ Setting the `short` property to `false` will copy the entire class (`class Name 
 Setting the `short` property to `false` will also copy the entire method into the README.md file. Check it out in this quote block:
 
 > <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest::exampleMethod", "short": false } -->
-> 
+>
 > ```php
 > public static function exampleMethod(): void
 > {
 >     // This is an example method.
 >     $a = 1;
 >     $b = 25;
-> 
+>
 >     $c = $a + $b;
-> 
+>
 >     echo $c;
 >     // This is the end of the example method.
 > }
 > ```
-> 
+>
 > <!-- #EXAMPLE_COPY_END -->
 
 #### Example class (`short` set to `false`)
@@ -92,7 +92,7 @@ Setting the `short` property to `false` will also copy the entire method into th
 For classes it may make sense to set `short` to `false` to copy the entire class into the README.md file. Check it out in this quote block:
 
 > <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
-> 
+>
 > ```php
 > final class ExampleClassTest extends TestCase
 > {
@@ -101,13 +101,13 @@ For classes it may make sense to set `short` to `false` to copy the entire class
 >         // This is an example method.
 >         $a = 1;
 >         $b = 25;
-> 
+>
 >         $c = $a + $b;
-> 
+>
 >         echo $c;
 >         // This is the end of the example method.
 >     }
-> 
+>
 >     /**
 >      * @test
 >      */
@@ -116,12 +116,12 @@ For classes it may make sense to set `short` to `false` to copy the entire class
 >         ob_start();
 >         self::exampleMethod();
 >         $output = ob_get_clean();
-> 
+>
 >         $this->assertSame('26', $output);
 >     }
 > }
 > ```
-> 
+>
 > <!-- #EXAMPLE_COPY_END -->
 
 ## Ignoring examples
