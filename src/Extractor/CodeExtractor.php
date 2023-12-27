@@ -10,17 +10,20 @@ use PhpParser\Node\Stmt\ClassMethod;
 
 class CodeExtractor implements CodeExtractorInterface
 {
-    private const PHP_PARSER_OPEN_TAG = "<?php\n";
-
-    private function parseFullyQualifiedMethodName(string $fullyQualifiedMethodName): array
+    private function parseFullyQualifiedName(string $fullyQualifiedName): array
     {
-        $parts = explode('::', $fullyQualifiedMethodName);
+        $parts = explode('::', $fullyQualifiedName);
 
-        if (count($parts) !== 2) {
-            throw new \Exception("Invalid fully qualified method name: {$fullyQualifiedMethodName}");
+        if (count($parts) === 1) {
+            $reflectionClass = new \ReflectionClass($parts[0]);
+
+            return [$reflectionClass, null];
         }
 
-        return $parts;
+        $reflectionClass = new \ReflectionClass($parts[0]);
+        $methodName = $parts[1];
+
+        return [$reflectionClass, $methodName];
     }
 
     private static function makeParserWithLexer()
@@ -52,10 +55,8 @@ class CodeExtractor implements CodeExtractorInterface
         return $visitor->getMethodNode();
     }
 
-    private function getRelevantFileCode(string $className, ?string $methodName = null)
+    private function getRelevantFileCode(\ReflectionClass $reflectionClass, ?string $methodName = null)
     {
-        $reflectionClass = new \ReflectionClass($className);
-
         if ($methodName !== null) {
             $reflectionMethod = $reflectionClass->getMethod($methodName);
             $fileName = $reflectionMethod->getFileName();
@@ -70,9 +71,9 @@ class CodeExtractor implements CodeExtractorInterface
 
     public function extractMethodDefinition(string $fullyQualifiedMethodName): string
     {
-        [$className, $methodName] = $this->parseFullyQualifiedMethodName($fullyQualifiedMethodName);
+        [$reflectionClass, $methodName] = $this->parseFullyQualifiedName($fullyQualifiedMethodName);
 
-        $codeFile = $this->getRelevantFileCode($className, $methodName);
+        $codeFile = $this->getRelevantFileCode($reflectionClass, $methodName);
         $methodNode = $this->getMethodNode($codeFile, $methodName);
 
         if ($methodNode === null) {
@@ -101,9 +102,9 @@ class CodeExtractor implements CodeExtractorInterface
 
     public function extractMethodBody(string $fullyQualifiedMethodName): string
     {
-        [$className, $methodName] = $this->parseFullyQualifiedMethodName($fullyQualifiedMethodName);
+        [$reflectionClass, $methodName] = $this->parseFullyQualifiedName($fullyQualifiedMethodName);
 
-        $codeFile = $this->getRelevantFileCode($className, $methodName);
+        $codeFile = $this->getRelevantFileCode($reflectionClass, $methodName);
         $methodNode = $this->getMethodNode($codeFile, $methodName);
 
         if ($methodNode === null) {
@@ -141,12 +142,12 @@ class CodeExtractor implements CodeExtractorInterface
         return Indentation::unindent($code);
     }
 
-    private function getClassNode(string $code, string $className): ?Class_
+    private function getClassNode(string $code, string $shortClassName): ?Class_
     {
         [$parser, $lexer] = self::makeParserWithLexer();
         $traverser = new \PhpParser\NodeTraverser();
 
-        $visitor = new ClassExtractorVisitor($className);
+        $visitor = new ClassExtractorVisitor($shortClassName);
         $traverser->addVisitor($visitor);
 
         $stmts = $parser->parse($code);
@@ -158,10 +159,10 @@ class CodeExtractor implements CodeExtractorInterface
 
     public function extractClassDefinition(string $fullyQualifiedClassName): string
     {
-        $className = basename($fullyQualifiedClassName);
+        [$reflectionClass] = $this->parseFullyQualifiedName($fullyQualifiedClassName);
 
-        $codeFile = $this->getRelevantFileCode($fullyQualifiedClassName);
-        $classNode = $this->getClassNode($codeFile, $className);
+        $codeFile = $this->getRelevantFileCode($reflectionClass);
+        $classNode = $this->getClassNode($codeFile, $reflectionClass->getShortName());
 
         if ($classNode === null) {
             throw new \Exception("Class {$fullyQualifiedClassName} not found");
@@ -189,10 +190,10 @@ class CodeExtractor implements CodeExtractorInterface
 
     public function extractClassBody(string $fullyQualifiedClassName): string
     {
-        $className = basename($fullyQualifiedClassName);
+        [$reflectionClass] = $this->parseFullyQualifiedName($fullyQualifiedClassName);
 
-        $codeFile = $this->getRelevantFileCode($fullyQualifiedClassName);
-        $classNode = $this->getClassNode($codeFile, $className);
+        $codeFile = $this->getRelevantFileCode($reflectionClass);
+        $classNode = $this->getClassNode($codeFile, $reflectionClass->getShortName());
 
         if ($classNode === null) {
             throw new \Exception("Class {$fullyQualifiedClassName} not found");
