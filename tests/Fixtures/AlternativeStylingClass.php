@@ -2,8 +2,14 @@
 
 namespace Luttje\ExampleTester\Tests\Fixtures;
 
+/**
+ * A class with methods of alternative styling
+ */
 final class AlternativeStylingClass
 {
+    /**
+     * A method with braces on the same line
+     */
     public static function methodWithBracesOnSameLine(): void {
         // start
         $a = 1;

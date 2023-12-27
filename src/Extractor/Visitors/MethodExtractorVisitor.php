@@ -1,19 +1,15 @@
 <?php
 
-namespace Luttje\ExampleTester\Extractor;
+namespace Luttje\ExampleTester\Extractor\Visitors;
 
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
-/**
- * @internal
- */
 class MethodExtractorVisitor extends NodeVisitorAbstract
 {
     private ?Node\Stmt\ClassMethod $methodNode = null;
 
     public function __construct(
-        private string $className,
         private string $methodName,
     )
     { }

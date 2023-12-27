@@ -27,6 +27,27 @@ final class CodeExtractorTest extends TestCase
         CODE, $code);
     }
 
+    public function testMethodWithBracesOnSameLineDefinitionDocComment()
+    {
+        $codeExtractor = new CodeExtractor();
+        $code = $codeExtractor->extractMethodDefinition(AlternativeStylingClass::class . '::methodWithBracesOnSameLine');
+
+        $this->assertSame(<<<'CODE'
+        /**
+         * A method with braces on the same line
+         */
+        public static function methodWithBracesOnSameLine(): void {
+            // start
+            $a = 1;
+            $b = 25;
+
+            $c = $a + $b;
+            echo $c;
+            // end
+        }
+        CODE, $code);
+    }
+
     public function testMethodWithBracesOnNewLine()
     {
         $codeExtractor = new CodeExtractor();
@@ -150,6 +171,32 @@ final class CodeExtractorTest extends TestCase
         $c = $a + $b;
         echo $c;
         // end
+        CODE, $code);
+    }
+
+    public function testClassWithDocComment()
+    {
+        $codeExtractor = new CodeExtractor();
+        $code = $codeExtractor->extractClassDefinition(AlternativeStylingClass::class);
+
+        $this->assertStringStartsWith(<<<'CODE'
+        /**
+         * A class with methods of alternative styling
+         */
+        final class AlternativeStylingClass
+        {
+            /**
+             * A method with braces on the same line
+             */
+            public static function methodWithBracesOnSameLine(): void {
+                // start
+                $a = 1;
+                $b = 25;
+
+                $c = $a + $b;
+                echo $c;
+                // end
+            }
         CODE, $code);
     }
 }

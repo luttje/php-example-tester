@@ -3,8 +3,10 @@
 namespace Luttje\ExampleTester\Extractor;
 
 use ColinODell\Indentation\Indentation;
+use Luttje\ExampleTester\Extractor\Visitors\ClassExtractorVisitor;
+use Luttje\ExampleTester\Extractor\Visitors\MethodExtractorVisitor;
+use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\PrettyPrinter;
 
 class CodeExtractor implements CodeExtractorInterface
 {
@@ -35,54 +37,150 @@ class CodeExtractor implements CodeExtractorInterface
         return [$parser, $lexer];
     }
 
-    private function getMethodNodeWithFormatter(string $fullyQualifiedMethodName, ?\Closure &$formatter = null): ClassMethod
+    private function getMethodNode(string $code, string $methodName): ?ClassMethod
     {
-        [$className, $methodName] = $this->parseFullyQualifiedMethodName($fullyQualifiedMethodName);
-
-        $reflectionClass = new \ReflectionClass($className);
-        $reflectionMethod = $reflectionClass->getMethod($methodName);
-        $fileName = $reflectionMethod->getFileName();
-
         [$parser, $lexer] = self::makeParserWithLexer();
         $traverser = new \PhpParser\NodeTraverser();
 
-        $visitor = new MethodExtractorVisitor($className, $methodName);
+        $visitor = new MethodExtractorVisitor($methodName);
         $traverser->addVisitor($visitor);
+
+        $stmts = $parser->parse($code);
+
+        $traverser->traverse($stmts);
+
+        return $visitor->getMethodNode();
+    }
+
+    private function getRelevantFileCode(string $className, ?string $methodName = null)
+    {
+        $reflectionClass = new \ReflectionClass($className);
+
+        if ($methodName !== null) {
+            $reflectionMethod = $reflectionClass->getMethod($methodName);
+            $fileName = $reflectionMethod->getFileName();
+        } else {
+            $fileName = $reflectionClass->getFileName();
+        }
 
         $code = file_get_contents($fileName);
 
-        $oldStmts = $parser->parse($code);
-        $oldTokens = $lexer->getTokens();
-
-        $traverser->traverse($oldStmts);
-
-        $methodNode = $visitor->getMethodNode();
-
-        if ($methodNode === null) {
-            throw new \Exception("Could not find method {$fullyQualifiedMethodName}");
-        }
-
-        $prettyPrinter = new PrettyPrinter\Standard();
-        // Replace "<?php\n" from the start of the code with an empty string
-        $formatter = fn ($newStmts) => substr($prettyPrinter->printFormatPreserving($newStmts, $oldStmts, $oldTokens), strlen(static::PHP_PARSER_OPEN_TAG));
-
-        return $methodNode;
+        return $code;
     }
 
-    public function extractMethodBody(string $fullyQualifiedMethodName): string
+    public function extractMethodDefinition(string $fullyQualifiedMethodName): string
     {
-        $methodNode = $this->getMethodNodeWithFormatter($fullyQualifiedMethodName, $formatter);
-        $code = $formatter($methodNode->stmts);
+        [$className, $methodName] = $this->parseFullyQualifiedMethodName($fullyQualifiedMethodName);
+
+        $codeFile = $this->getRelevantFileCode($className, $methodName);
+        $methodNode = $this->getMethodNode($codeFile, $methodName);
+
+        if ($methodNode === null) {
+            throw new \Exception("Method {$fullyQualifiedMethodName} not found");
+        }
+
+        $startLine = $methodNode->getAttribute('startLine');
+        $endLine = $methodNode->getAttribute('endLine');
+
+        // If the method has a doc comment, get the line of the doc comment instead
+        if (count($methodNode->getComments()) > 0) {
+            $startLine = $methodNode->getComments()[0]->getStartLine();
+        }
+
+        $splitCode = explode("\n", $codeFile);
+        $code = '';
+
+        foreach (range($startLine, $endLine) as $lineNumber) {
+            $code .= $splitCode[$lineNumber - 1] . "\n";
+        }
 
         $code = ltrim(rtrim(Indentation::unindent($code)));
 
         return Indentation::unindent($code);
     }
 
-    public function extractMethodDefinition(string $fullyQualifiedMethodName): string
+    public function extractMethodBody(string $fullyQualifiedMethodName): string
     {
-        $methodNode = $this->getMethodNodeWithFormatter($fullyQualifiedMethodName, $formatter);
-        $code = $formatter([$methodNode]);
+        [$className, $methodName] = $this->parseFullyQualifiedMethodName($fullyQualifiedMethodName);
+
+        $codeFile = $this->getRelevantFileCode($className, $methodName);
+        $methodNode = $this->getMethodNode($codeFile, $methodName);
+
+        if ($methodNode === null) {
+            throw new \Exception("Method {$fullyQualifiedMethodName} not found");
+        }
+
+        if ($methodNode->stmts === null) {
+            throw new \Exception("Method {$fullyQualifiedMethodName} has no body");
+        }
+
+        // Get the line of the first statement in the method
+        $firstStatement = $methodNode->stmts[0];
+
+        // If it has comments, get the line of the first comment instead
+        if (count($firstStatement->getComments()) > 0) {
+            $firstStatement = $firstStatement->getComments()[0];
+        }
+
+        $firstStatementLine = $firstStatement->getStartLine();
+
+        // Get the line of the last statement in the method
+        $lastStatement = $methodNode->stmts[count($methodNode->stmts) - 1];
+        $lastStatementLine = $lastStatement->getEndLine();
+
+        $splitCode = explode("\n", $codeFile);
+
+        $code = '';
+
+        foreach (range($firstStatementLine, $lastStatementLine) as $lineNumber) {
+            $code .= $splitCode[$lineNumber - 1] . "\n";
+        }
+
+        $code = ltrim(rtrim(Indentation::unindent($code)));
+
+        return Indentation::unindent($code);
+    }
+
+    private function getClassNode(string $code, string $className): ?Class_
+    {
+        [$parser, $lexer] = self::makeParserWithLexer();
+        $traverser = new \PhpParser\NodeTraverser();
+
+        $visitor = new ClassExtractorVisitor($className);
+        $traverser->addVisitor($visitor);
+
+        $stmts = $parser->parse($code);
+
+        $traverser->traverse($stmts);
+
+        return $visitor->getClassNode();
+    }
+
+    public function extractClassDefinition(string $fullyQualifiedClassName): string
+    {
+        $className = basename($fullyQualifiedClassName);
+
+        $codeFile = $this->getRelevantFileCode($fullyQualifiedClassName);
+        $classNode = $this->getClassNode($codeFile, $className);
+
+        if ($classNode === null) {
+            throw new \Exception("Class {$fullyQualifiedClassName} not found");
+        }
+
+        $startLine = $classNode->getAttribute('startLine');
+        $endLine = $classNode->getAttribute('endLine');
+
+        // If the class has a doc comment, get the line of the doc comment instead
+        if (count($classNode->getComments()) > 0) {
+            $startLine = $classNode->getComments()[0]->getStartLine();
+        }
+
+        $splitCode = explode("\n", $codeFile);
+        $code = '';
+
+        foreach (range($startLine, $endLine) as $lineNumber) {
+            $code .= $splitCode[$lineNumber - 1] . "\n";
+        }
 
         $code = ltrim(rtrim(Indentation::unindent($code)));
 
@@ -91,39 +189,39 @@ class CodeExtractor implements CodeExtractorInterface
 
     public function extractClassBody(string $fullyQualifiedClassName): string
     {
-        $reflectionClass = new \ReflectionClass($fullyQualifiedClassName);
+        $className = basename($fullyQualifiedClassName);
 
-        $fileName = $reflectionClass->getFileName();
-        $startLine = $reflectionClass->getStartLine();
-        $endLine = $reflectionClass->getEndLine() - 1;
+        $codeFile = $this->getRelevantFileCode($fullyQualifiedClassName);
+        $classNode = $this->getClassNode($codeFile, $className);
 
-        $code = '';
-
-        foreach (range($startLine, $endLine) as $lineNumber) {
-            $code .= file($fileName)[$lineNumber];
+        if ($classNode === null) {
+            throw new \Exception("Class {$fullyQualifiedClassName} not found");
         }
 
-        $code = ltrim(rtrim(Indentation::unindent($code)));
+        if ($classNode->stmts === null) {
+            throw new \Exception("Class {$fullyQualifiedClassName} has no body");
+        }
 
-        // Remove { and } and any newlines before/after them
-        $code = preg_replace('/^{[\r\n]+/', '', $code);
-        $code = preg_replace('/[\r\n]+}$/', '', $code);
+        // Get the line of the first statement in the class
+        $firstStatement = $classNode->stmts[0];
 
-        return Indentation::unindent($code);
-    }
+        // If it has comments, get the line of the first comment instead
+        if (count($firstStatement->getComments()) > 0) {
+            $firstStatement = $firstStatement->getComments()[0];
+        }
 
-    public function extractClassDefinition(string $fullyQualifiedClassName): string
-    {
-        $reflectionClass = new \ReflectionClass($fullyQualifiedClassName);
+        $firstStatementLine = $firstStatement->getStartLine();
 
-        $fileName = $reflectionClass->getFileName();
-        $startLine = $reflectionClass->getStartLine() - 1;
-        $endLine = $reflectionClass->getEndLine() - 1;
+        // Get the line of the last statement in the class
+        $lastStatement = $classNode->stmts[count($classNode->stmts) - 1];
+        $lastStatementLine = $lastStatement->getEndLine();
+
+        $splitCode = explode("\n", $codeFile);
 
         $code = '';
 
-        foreach (range($startLine, $endLine) as $lineNumber) {
-            $code .= file($fileName)[$lineNumber];
+        foreach (range($firstStatementLine, $lastStatementLine) as $lineNumber) {
+            $code .= $splitCode[$lineNumber - 1] . "\n";
         }
 
         $code = ltrim(rtrim(Indentation::unindent($code)));
