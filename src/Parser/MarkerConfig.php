@@ -8,6 +8,7 @@ class MarkerConfig
     protected string $startMarker;
     protected string $endMarker;
     protected bool $short = true;
+    protected ?string $prefix = null;
 
     public static function fromArray(array $array): static
     {
@@ -22,6 +23,11 @@ class MarkerConfig
         }
 
         return $markerConfig;
+    }
+
+    public function getPrefix(): string|null
+    {
+        return $this->prefix;
     }
 
     public function getSymbol(): string

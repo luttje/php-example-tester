@@ -14,8 +14,14 @@ class ExampleFormatter implements ExampleFormatterInterface
     {
         $example = "\n```php\n" . $example . "\n```\n";
 
-        $example = $markerConfig->getStartMarker() . "\n" . $example . "\n" . $markerConfig->getEndMarker() . "\n";
+        $example = $markerConfig->getStartMarker() . "\n" . $example . "\n" . $markerConfig->getEndMarker();
 
-        return $example;
+        $prefix = $markerConfig->getPrefix();
+
+        if ($prefix !== null) {
+            $example = $prefix . str_replace("\n", "\n" . $prefix, $example);
+        }
+
+        return $example . "\n";
     }
 }

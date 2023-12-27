@@ -53,6 +53,11 @@ class ReadmeExampleChunk extends ReadmeChunk
         $markerConfig['startMarker'] = $startMarker;
         $markerConfig['endMarker'] = $endMarker;
 
+        // Check if there's any prefixes from the beginning of the line to the start marker
+        if (!isset($markerConfig['prefix']) && $startMarkerPos > 0) {
+            $markerConfig['prefix'] = substr($content, 0, $startMarkerPos);
+        }
+
         $markerConfig = MarkerConfig::fromArray($markerConfig);
 
         return $markerConfig;
