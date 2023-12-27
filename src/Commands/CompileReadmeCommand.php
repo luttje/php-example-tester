@@ -38,7 +38,7 @@ class CompileReadmeCommand extends Command
         $outputFile = $input->getOption('output') ?? $workingDirectory.'/README.md';
         $inputFile = $input->getOption('input') ?? $outputFile;
 
-        if (! is_file($inputFile)) {
+        if (!is_file($inputFile)) {
             $output->writeLn("<error>Input file {$inputFile} does not exist.</error>");
 
             return Command::FAILURE;
@@ -50,8 +50,9 @@ class CompileReadmeCommand extends Command
             return Command::FAILURE;
         }
 
-        // Check if the output file is a valid file path.
-        if (is_file($outputFile) && ! is_writable($outputFile)) {
+        $outputHandle = $this->openExclusive($outputFile);
+
+        if (!$outputHandle) {
             $output->writeLn("<error>Output file {$outputFile} is not writable.</error>");
 
             return Command::FAILURE;
@@ -59,24 +60,46 @@ class CompileReadmeCommand extends Command
 
         if ($inputFile === $outputFile) {
             $output->writeLn("Compiling examples in {$inputFile}...");
+            $input = stream_get_contents($outputHandle);
+            fseek($outputHandle, 0);
         } else {
             $output->writeLn("Compiling examples from {$inputFile} to {$outputFile}...");
+            $input = file_get_contents($inputFile);
         }
 
-        if (!$this->compile($inputFile, $outputFile)) {
-            return Command::FAILURE;
-        }
+        $this->compile($input, $outputHandle);
+
+        $this->closeExclusive($outputHandle);
 
         $output->writeLn('Done compiling examples!');
 
         return Command::SUCCESS;
     }
 
-    protected function compile(string $inputFile, string $outputFile): bool
+    protected function openExclusive(string $path): mixed
+    {
+        $handle = @fopen($path, 'c+');
+
+        if (!$handle) {
+            return false;
+        }
+
+        if (!flock($handle, LOCK_EX|LOCK_NB, $wouldBlock) && $wouldBlock) {
+            fclose($handle);
+            return false;
+        }
+
+        return $handle;
+    }
+
+    protected function closeExclusive($handle): bool
+    {
+        return flock($handle, LOCK_UN) && fclose($handle);
+    }
+
+    protected function compile(string $input, mixed $outputHandle): void
     {
         $compiler = new ReadmeCompiler();
-        $compiler->compile($inputFile, $outputFile);
-
-        return true;
+        $compiler->compile($input, $outputHandle);
     }
 }

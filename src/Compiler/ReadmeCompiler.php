@@ -17,9 +17,8 @@ class ReadmeCompiler implements ReadmeCompilerInterface
         );
     }
 
-    public function compile(string $inputFile, string $outputFile): void
+    public function compile(string $input, mixed $outputHandle): void
     {
-        $input = file_get_contents($inputFile);
         $chunks = $this->readmeParser->parse($input);
 
         $content = '';
@@ -27,6 +26,7 @@ class ReadmeCompiler implements ReadmeCompilerInterface
             $content .= $chunk->getContent();
         }
 
-        file_put_contents($outputFile, $content);
+        // truncate file
+        fwrite($outputHandle, $content);
     }
 }
