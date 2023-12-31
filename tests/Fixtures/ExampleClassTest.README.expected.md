@@ -94,6 +94,8 @@ For classes it may make sense to set `short` to `false` to copy the entire class
 > <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
 >
 > ```php
+> use Luttje\ExampleTester\Tests\TestCase;
+>
 > final class ExampleClassTest extends TestCase
 > {
 >     public static function exampleMethod(): void

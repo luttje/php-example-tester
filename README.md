@@ -57,6 +57,8 @@ can then extract the body of the method and use it as the example code.
 <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
 
 ```php
+use Luttje\ExampleTester\Tests\TestCase;
+
 final class ExampleClassTest extends TestCase
 {
     public static function exampleMethod(): void
@@ -187,6 +189,8 @@ The `short` property defaults to `true` and ensures only the body of the method 
 > <!-- #EXAMPLE_COPY_START = { "symbol": "\\Luttje\\ExampleTester\\Tests\\Fixtures\\ExampleClassTest", "short": false } -->
 >
 > ```php
+> use Luttje\ExampleTester\Tests\TestCase;
+>
 > final class ExampleClassTest extends TestCase
 > {
 >     public static function exampleMethod(): void

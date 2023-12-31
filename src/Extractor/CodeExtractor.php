@@ -142,7 +142,7 @@ class CodeExtractor implements CodeExtractorInterface
         return Indentation::unindent($code);
     }
 
-    private function getClassNode(string $code, string $shortClassName): ?Class_
+    private function getClassNode(string $code, string $shortClassName, ?array &$useStatements = null): ?Class_
     {
         [$parser, $lexer] = self::makeParserWithLexer();
         $traverser = new \PhpParser\NodeTraverser();
@@ -154,6 +154,7 @@ class CodeExtractor implements CodeExtractorInterface
 
         $traverser->traverse($stmts);
 
+        $useStatements = $visitor->getUseStatements();
         return $visitor->getClassNode();
     }
 
@@ -162,7 +163,7 @@ class CodeExtractor implements CodeExtractorInterface
         [$reflectionClass] = $this->parseFullyQualifiedName($fullyQualifiedClassName);
 
         $codeFile = $this->getRelevantFileCode($reflectionClass);
-        $classNode = $this->getClassNode($codeFile, $reflectionClass->getShortName());
+        $classNode = $this->getClassNode($codeFile, $reflectionClass->getShortName(), $useStatements);
 
         if ($classNode === null) {
             throw new \Exception("Class {$fullyQualifiedClassName} not found");
@@ -178,6 +179,18 @@ class CodeExtractor implements CodeExtractorInterface
 
         $splitCode = explode("\n", $codeFile);
         $code = '';
+
+        // Start with the use statements
+        foreach ($useStatements as $useStatement) {
+            $useStartLine = $useStatement->getAttribute('startLine');
+            $useEndLine = $useStatement->getAttribute('endLine');
+
+            foreach (range($useStartLine, $useEndLine) as $lineNumber) {
+                $code .= $splitCode[$lineNumber - 1] . "\n";
+            }
+        }
+
+        $code .= "\n";
 
         foreach (range($startLine, $endLine) as $lineNumber) {
             $code .= $splitCode[$lineNumber - 1] . "\n";
