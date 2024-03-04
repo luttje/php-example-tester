@@ -7,6 +7,8 @@ use Luttje\ExampleTester\Extractor\Visitors\ClassExtractorVisitor;
 use Luttje\ExampleTester\Extractor\Visitors\MethodExtractorVisitor;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\ParserFactory;
+use PhpParser\PhpVersion;
 
 class CodeExtractor implements CodeExtractorInterface
 {
@@ -26,23 +28,14 @@ class CodeExtractor implements CodeExtractorInterface
         return [$reflectionClass, $methodName];
     }
 
-    private static function makeParserWithLexer()
+    private static function makeParser()
     {
-        $lexer = new \PhpParser\Lexer\Emulative([
-            'usedAttributes' => [
-                'comments',
-                'startLine', 'endLine',
-                'startTokenPos', 'endTokenPos',
-            ],
-        ]);
-        $parser = new \PhpParser\Parser\Php7($lexer);
-
-        return [$parser, $lexer];
+        return (new ParserFactory())->createForVersion(PhpVersion::fromString("7.0"));
     }
 
     private function getMethodNode(string $code, string $methodName): ?ClassMethod
     {
-        [$parser, $lexer] = self::makeParserWithLexer();
+        $parser = self::makeParser();
         $traverser = new \PhpParser\NodeTraverser();
 
         $visitor = new MethodExtractorVisitor($methodName);
@@ -144,7 +137,7 @@ class CodeExtractor implements CodeExtractorInterface
 
     private function getClassNode(string $code, string $shortClassName, ?array &$useStatements = null): ?Class_
     {
-        [$parser, $lexer] = self::makeParserWithLexer();
+        $parser = self::makeParser();
         $traverser = new \PhpParser\NodeTraverser();
 
         $visitor = new ClassExtractorVisitor($shortClassName);
