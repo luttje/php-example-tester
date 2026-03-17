@@ -9,7 +9,7 @@
  * the classes of a project that uses this package as a dependency.
  *
  */
-require getcwd().'/vendor/autoload.php';
+require getcwd() . '/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
 
@@ -25,10 +25,10 @@ $application = new Application();
  * Add all commands to the application.
  *
  */
-$commands = require __DIR__.'/../commands.php';
+$commands = require __DIR__ . '/../commands.php';
 
 foreach ($commands as $command) {
-    $application->add(new $command);
+    $application->addCommand(new $command);
 }
 
 /**

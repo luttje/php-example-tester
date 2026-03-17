@@ -17,11 +17,10 @@ class TestCase extends BaseTestCase
         $application->setAutoExit(false);
         $this->application = $application;
 
-        $commands = require __DIR__.'/../commands.php';
+        $commands = require __DIR__ . '/../commands.php';
 
         foreach ($commands as $command) {
-            $application->add(new $command);
+            $application->addCommand(new $command);
         }
-
     }
 }
