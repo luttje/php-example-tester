@@ -17,14 +17,14 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "colinodell/indentation": "^1.0",
         "nikic/php-parser": "^5.0",
         "symfony/console": "^7.4|^8.0"
     },
     "require-dev": {
         "nunomaduro/collision": "^7.9|^8.1",
-        "phpunit/phpunit": "^10.5|^11.0|^12.5.22"
+        "phpunit/phpunit": "^12.5.22"
     },
     "autoload": {
         "psr-4": {
