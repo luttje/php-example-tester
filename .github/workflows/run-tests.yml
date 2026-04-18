@@ -3,11 +3,11 @@ name: run-tests
 on:
   push:
     paths:
-      - "**.php"
-      - ".github/workflows/run-tests.yml"
-      - "phpunit.xml.dist"
-      - "composer.json"
-      - "composer.lock"
+    - "**.php"
+    - ".github/workflows/run-tests.yml"
+    - "phpunit.xml.dist"
+    - "composer.json"
+    - "composer.lock"
 
 jobs:
   test:
@@ -16,55 +16,55 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
-        php: [8.4, 8.3, 8.2]
-        stability: [prefer-lowest, prefer-stable]
+        os: [ ubuntu-latest ]
+        php: [ 8.5, 8.4, 8.3, 8.2 ]
+        stability: [ prefer-lowest, prefer-stable ]
 
     name: P${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+    - name: Checkout code
+      uses: actions/checkout@v6
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
-          coverage: xdebug
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+        coverage: xdebug
 
-      - name: Setup problem matchers
-        run: |
-          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
-          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+    - name: Setup problem matchers
+      run: |
+        echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+        echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Install dependencies
-        run: |
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+    - name: Install dependencies
+      run: |
+        composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
-      - name: List Installed Dependencies
-        run: composer show -D
+    - name: List Installed Dependencies
+      run: composer show -D
 
-      - name: Execute tests (with retry)
-        uses: nick-fields/retry@v4.0.0
-        env:
-          RUNNING_IN_CI: true
-        with:
-          timeout_minutes: 4
-          max_attempts: 3
-          command: composer test-ci
+    - name: Execute tests (with retry)
+      uses: nick-fields/retry@v4.0.0
+      env:
+        RUNNING_IN_CI: true
+      with:
+        timeout_minutes: 4
+        max_attempts: 3
+        command: composer test-ci
 
-      - name: Send coverage to Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel: true
+    - name: Send coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        parallel: true
 
   finish:
     needs: test
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel-finished: true
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v2
+      with:
+        parallel-finished: true
